@@ -181,11 +181,17 @@ fi
 # Check and resize root and home in case usage indicates first boot
 check_firstboot_resize
 
-# TODO: revisit for encryption, where home would not be mounted here.
-if (mount -t ext4 $ROOTDEV $1 && mount -t ext4 $HOMEDEV $1/home); then
-	log "Root and home partitions are mounted."
-	# If we are here then filesystem is already resized.
-	touch "$1/$FS_RESIZED"
+if mount -t ext4 $ROOTDEV $1; then
+        log "Root partition is mounted"
+        # If we are here then filesystem is already resized.
+        touch "$1/$FS_RESIZED"
+
+	if ! cryptsetup isLuks $HOMEDEV; then
+		mount -t ext4 $HOMEDEV $1/home
+                log "Home partition is mounted"
+	else
+                log "Home partition is encrypted, not mounting"
+	fi
 	exit 0
 fi
 
