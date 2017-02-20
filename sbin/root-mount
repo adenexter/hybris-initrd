@@ -107,8 +107,12 @@ check_firstboot_resize()
 factory_reset_if_needed()
 {
 	if test -f $1/usr/share/lipstick/devicelock/.clear-device; then
+                WIPE=""
 		if test -f $1/usr/share/lipstick/devicelock/.clear-device-enable-reboot; then
 			REBOOT=1
+		fi
+		if test -f $1/usr/share/lipstick/devicelock/.clear-device-full-wipe; then
+			WIPE="--full-wipe"
 		fi
 		umount $1
 
@@ -130,7 +134,7 @@ factory_reset_if_needed()
 
 		YAMUIPID=$!
 
-		if factory-reset-lvm $LVM_ROOT_SIZE $LVM_RESERVED_MB; then
+		if factory-reset-lvm $LVM_ROOT_SIZE $LVM_RESERVED_MB $WIPE; then
 			# Successful recovery.
 
 			kill "$YAMUIPID"
